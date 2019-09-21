@@ -24,15 +24,19 @@ namespace FirstMod
         private const string ModVer = "0.0.1";
         private const string ModName = "Bitter Root";
         public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
+        
 
         public void Awake()
         {
+            ItemIndex rootID = (ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root");
+
             On.RoR2.CharacterBody.RecalculateStats += (orig, self) =>
             {
-                ItemIndex rootID = (ItemIndex) ItemLib.ItemLib.GetItemId("Bitter Root");
                 orig(self);
-                self.SetFieldValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
-                
+                if (self.inventory)
+                {
+                    self.SetFieldValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
+                }
             };
         }
 
@@ -68,15 +72,15 @@ namespace FirstMod
             ItemDef Ginger = new ItemDef
             {
                 tier = ItemTier.Tier1,
-                pickupModelPath = "Assets/SuperiorRoot.fbx",
-                pickupIconPath = "Assets/superiorRoot.png",
+                pickupModelPath = "",
+                pickupIconPath = "",
                 nameToken = "Bitter Root",
                 pickupToken = "8% increased maximum health",
                 descriptionToken = "oof ouch owie it's bitter o no"
             };
             _itemDisplayRules = null;
 
-            return new ItemLib.CustomItem(Ginger, null, icon, _itemDisplayRules);
+            return new CustomItem(Ginger, model, icon, _itemDisplayRules);
 
         }
     }
