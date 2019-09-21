@@ -62,7 +62,6 @@ namespace FirstMod
             icon = bitterBundle.LoadAsset<UnityEngine.Object>("Assets/superiorRoot.png");
             model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/SuperiorRoot.fbx");
             
-            //Jude remember to turn your output volume back down when you're done messing with FunkFrog
 
             ItemDef Ginger = new ItemDef
             {
