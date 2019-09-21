@@ -13,6 +13,8 @@ namespace FirstMod
     //You don't need this if you're not using R2API in your plugin, it's just to tell BepInEx to initialize R2API before this plugin so it's safe to use R2API.
     [BepInDependency("com.bepis.r2api")]
 
+    [BepInDependency(ItemLibPlugin.ModGuid)]
+
     //This attribute is required, and lists metadata for your plugin.
     //The GUID should be a unique ID for this plugin, which is human readable (as it is used in places like the config). I like to use the java package notation, which is "com.[your name here].[your plugin name here]"
     //The name is the name of the plugin that's displayed on load, and the version number just specifies what version the plugin is.
@@ -24,18 +26,20 @@ namespace FirstMod
         private const string ModVer = "0.0.1";
         private const string ModName = "Bitter Root";
         public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
-        
+        ItemIndex rootID = (ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root");
 
         public void Awake()
         {
-            ItemIndex rootID = (ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root");
+            
 
             On.RoR2.CharacterBody.RecalculateStats += (orig, self) =>
             {
                 orig(self);
                 if (self.inventory)
                 {
-                    self.SetFieldValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
+                    float oldHealth = self.maxHealth;
+                    self.SetPropertyValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
+                    self.healthComponent.Heal(self.maxHealth - oldHealth, default(ProcChainMask), false);
                 }
             };
         }
@@ -45,7 +49,7 @@ namespace FirstMod
             if (Input.GetKeyDown(KeyCode.F2))
             {
                 var transform = PlayerCharacterMasterController.instances[0].master.GetBodyObject().transform;
-                Ginger();
+                
                 PickupDropletController.CreatePickupDroplet(PickupIndex.Find("ItemIndex.Count"), transform.position, transform.forward * 20f);
             }
         }
@@ -66,7 +70,7 @@ namespace FirstMod
             bitterBundle = AssetBundle.LoadFromFile(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/bitterbundle");
             
             icon = bitterBundle.LoadAsset<UnityEngine.Object>("Assets/superiorRoot.png");
-            model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/SuperiorRoot.fbx");
+            model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/bitterBody.fbx");
             
 
             ItemDef Ginger = new ItemDef
