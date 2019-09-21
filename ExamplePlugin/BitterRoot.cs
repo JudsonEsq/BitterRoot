@@ -16,11 +16,15 @@ namespace FirstMod
     //This attribute is required, and lists metadata for your plugin.
     //The GUID should be a unique ID for this plugin, which is human readable (as it is used in places like the config). I like to use the java package notation, which is "com.[your name here].[your plugin name here]"
     //The name is the name of the plugin that's displayed on load, and the version number just specifies what version the plugin is.
-    [BepInPlugin("com.JudsonEsq.BitterestOfRoots", "BitterRoot", "1.0")]
+    [BepInPlugin("dev.JudsonEsq.BitterestOfRoots", "Bitter Root", "0.0.1")]
 
     
     public class BitterestOfRoots : BaseUnityPlugin 
     {
+        private const string ModVer = "0.0.1";
+        private const string ModName = "Bitter Root";
+        public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
+
         public void Awake()
         {
             On.RoR2.CharacterBody.RecalculateStats += (orig, self) =>
@@ -42,9 +46,7 @@ namespace FirstMod
             }
         }
         //Various tags for BepIn
-        private const string ModVer = "0.0.1";
-        private const string ModName = "Bitter Root";
-        public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
+        
 
         
         public static AssetBundle bitterBundle;
