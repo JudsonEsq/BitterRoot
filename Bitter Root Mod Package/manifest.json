@@ -1,0 +1,11 @@
+{
+  "name": "BitterestRoot",
+  "version_number": "1.0.2",
+  "website_url": "https://github.com/JudsonEsq/BitterRoot",
+  "description": "Allowing the heavens' gaze to kiss this ginseng masterpiece's divine surface once more. +8% max hp.",
+  "dependencies": [
+    "tristanmcpherson-R2API-2.1.16",
+    "bbepis-BepInExPack-2.0.0",
+    "xiaoxiao921-ItemLib-0.1.2"
+  ]
+}
