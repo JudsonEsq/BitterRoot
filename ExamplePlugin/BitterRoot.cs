@@ -29,9 +29,9 @@ namespace FirstMod
         private const string ModVer = "0.0.1";
         private const string ModName = "Bitter Root";
         public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
-        ItemIndex rootID = (ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root");
+        
 
-        void awake()
+        void Start()
         {
             IL.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
         }
@@ -39,24 +39,24 @@ namespace FirstMod
         void CharacterBody_RecalculateStats(ILContext il)
         {
 
-            ILCursor root = new ILCursor(il);
-            root.GotoNext(
+            ILCursor rootCursor = new ILCursor(il);
+            rootCursor.GotoNext(
                 x => x.MatchLdcR4(1),       //actual address at this point is ldc.r4
                 x => x.MatchStloc(32)       //actual address at this point is stloc.s
                 );
-            root.Index += 2;
-            root.Emit(OpCodes.Ldloc, 32);
-            root.Emit(OpCodes.Ldarg, 0);
-            root.EmitDelegate<Func<float, RoR2.CharacterBody, float>>(
+            rootCursor.Index += 2;
+            rootCursor.Emit(OpCodes.Ldloc, 32);
+            rootCursor.Emit(OpCodes.Ldarg, 0);
+            rootCursor.EmitDelegate<Func<float, RoR2.CharacterBody, float>>(
                 (currentMultiplier, self) =>
                 {
                     if (self.inventory)
-                        currentMultiplier += self.inventory.GetItemCount(rootID) * 0.08f;
+                        currentMultiplier += self.inventory.GetItemCount((ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root")) * 0.08f;
                     return currentMultiplier;
 
                 }
                 );
-            root.Emit(OpCodes.Stloc, 32);
+            rootCursor.Emit(OpCodes.Stloc, 32);
             
 
             //Old Code Museum; admissions 10 roots
@@ -66,21 +66,7 @@ namespace FirstMod
 
         }
 
-        
-
-
-        public void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                var transform = PlayerCharacterMasterController.instances[0].master.GetBodyObject().transform;
-                
-                PickupDropletController.CreatePickupDroplet(PickupIndex.Find("ItemIndex.Count"), transform.position, transform.forward * 20f);
-            }
-        }
         //Various tags for BepIn
-        
-
         
         public static AssetBundle bitterBundle;
         public static GameObject model;
@@ -95,7 +81,7 @@ namespace FirstMod
             bitterBundle = AssetBundle.LoadFromFile(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/bitterbundle");
             
             icon = bitterBundle.LoadAsset<UnityEngine.Object>("Assets/superiorRoot.png");
-            model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/rootModel.fbx");
+            model = bitterBundle.LoadAsset<GameObject>("Assets/rootModel.prefab");
             
 
             ItemDef Ginger = new ItemDef
