@@ -1,9 +1,12 @@
 ﻿using BepInEx;
 using ItemLib;
 using RoR2;
+using R2API;
 using UnityEngine;
-using R2API.Utils;
 using System.Reflection;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
 
 namespace FirstMod
 {
@@ -28,21 +31,43 @@ namespace FirstMod
         public const string ModGuid = "dev.JudsonEsq.BitterestOfRoots";
         ItemIndex rootID = (ItemIndex)ItemLib.ItemLib.GetItemId("Bitter Root");
 
-        public void Awake()
+        void awake()
         {
+            IL.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
+        }
+
+        void CharacterBody_RecalculateStats(ILContext il)
+        {
+
+            ILCursor root = new ILCursor(il);
+            root.GotoNext(
+                x => x.MatchLdcR4(1),       //actual address at this point is ldc.r4
+                x => x.MatchStloc(32)       //actual address at this point is stloc.s
+                );
+            root.Index += 2;
+            root.Emit(OpCodes.Ldloc, 32);
+            root.Emit(OpCodes.Ldarg, 0);
+            root.EmitDelegate<Func<float, RoR2.CharacterBody, float>>(
+                (currentMultiplier, self) =>
+                {
+                    if (self.inventory)
+                        currentMultiplier += self.inventory.GetItemCount(rootID) * 0.08f;
+                    return currentMultiplier;
+
+                }
+                );
+            root.Emit(OpCodes.Stloc, 32);
             
 
-            On.RoR2.CharacterBody.RecalculateStats += (orig, self) =>
-            {
-                orig(self);
-                if (self.inventory)
-                {
-                    float oldHealth = self.maxHealth;
-                    self.SetPropertyValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
-                    self.healthComponent.Heal(self.maxHealth - oldHealth, default(ProcChainMask), false);
-                }
-            };
+            //Old Code Museum; admissions 10 roots
+            //float oldHealth = self.maxHealth;
+            //self.SetPropertyValue<float>("maxHealth", self.maxHealth * (1f + 0.08f * self.inventory.GetItemCount(rootID)));
+            //self.healthComponent.Heal(self.maxHealth - oldHealth, default(ProcChainMask), false);
+
         }
+
+        
+
 
         public void Update()
         {
@@ -59,18 +84,18 @@ namespace FirstMod
         
         public static AssetBundle bitterBundle;
         public static GameObject model;
-        public static Object icon;
+        public static UnityEngine.Object icon;
 
         //Left null, as this item does not need to be displayed
         private static ItemDisplayRule[] _itemDisplayRules;
 
         [Item(ItemAttribute.ItemType.Item)]
-        public static CustomItem Ginger()
+        public static ItemLib.CustomItem Ginger()
         {
             bitterBundle = AssetBundle.LoadFromFile(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/bitterbundle");
             
             icon = bitterBundle.LoadAsset<UnityEngine.Object>("Assets/superiorRoot.png");
-            model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/bitterBody.fbx");
+            model = bitterBundle.LoadAsset<UnityEngine.GameObject>("Assets/rootModel.fbx");
             
 
             ItemDef Ginger = new ItemDef
@@ -84,7 +109,7 @@ namespace FirstMod
             };
             _itemDisplayRules = null;
 
-            return new CustomItem(Ginger, model, icon, _itemDisplayRules);
+            return new ItemLib.CustomItem(Ginger, model, icon, _itemDisplayRules);
 
         }
     }
